@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SIPClient"
         mc:Ignorable="d"
-        Title="SIP Client" Height="600" Width="500">
+        Title="SIP Client" Height="650" Width="500">
     <Window.Resources>
         <Style x:Key="DialButtonStyle" TargetType="Button">
             <Setter Property="Margin" Value="5"/>
@@ -29,7 +29,7 @@
     </Window.Resources>
     <Grid Background="#F0F0F0">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
-            <TextBlock Text="SIP Dialer" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
+            <TextBlock x:Name="TitleText" Text="SIP Dialer" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
 
             <TextBox x:Name="DisplayBox" Height="60" FontSize="28" TextAlignment="Right" Padding="10" Margin="0,0,0,20" IsReadOnly="True" Background="White" Foreground="Black"/>
 
@@ -40,6 +40,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -73,7 +74,10 @@
                 <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Content="Call" Click="CallButton_Click" Margin="5" Padding="10" Height="40" Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
 
                 <!-- Row 6 Answer button spanning full width -->
-                <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Answer Call" IsEnabled="False" Click="AnswerButton_Click" Margin="5" Padding="10" Background="#6b8eff" Foreground="Black" FontSize="14" FontWeight="Bold"/>
+                <Button x:Name="AnswerButton" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Answer Call" IsEnabled="False" Click="AnswerButton_Click" Margin="5" Padding="10" Background="#6b8eff" Foreground="Black" FontSize="14" FontWeight="Bold"/>
+
+                <!-- Row 7 Hang up button spanning full width -->
+                <Button x:Name="HangupButton" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Content="Hangup" IsEnabled="False" Click="HangupButton_Click" Margin="5" Padding="10" Background="#6b8eff" Foreground="Black" FontSize="14" FontWeight="Bold"/>
             </Grid>
         </StackPanel>
     </Grid>
