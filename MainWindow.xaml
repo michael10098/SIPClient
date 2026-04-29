@@ -26,10 +26,27 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
-    <Grid Background="#F0F0F0">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="Images/Background.png" Stretch="UniformToFill"/>
+        </Grid.Background>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
             <TextBlock x:Name="TitleText" Text="SIP Dialer" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
+            <TextBlock Text="Designed by Michael Van Hulle" FontSize="12" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
 
             <TextBox x:Name="DisplayBox" Height="60" FontSize="28" TextAlignment="Right" Padding="10" Margin="0,0,0,20" IsReadOnly="True" Background="White" Foreground="Black"/>
 
@@ -74,10 +91,10 @@
                 <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Content="Call" Click="CallButton_Click" Margin="5" Padding="10" Height="40" Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
 
                 <!-- Row 6 Answer button spanning full width -->
-                <Button x:Name="AnswerButton" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Answer Call" IsEnabled="False" Click="AnswerButton_Click" Margin="5" Padding="10" Background="#6b8eff" Foreground="Black" FontSize="14" FontWeight="Bold"/>
+                <Button x:Name="AnswerButton" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Answer Call" IsEnabled="False" Click="AnswerButton_Click" Background="#6b8eff" Foreground="Black" Style="{StaticResource ActionButtonStyle}"/>
 
                 <!-- Row 7 Hang up button spanning full width -->
-                <Button x:Name="HangupButton" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Content="Hangup" IsEnabled="False" Click="HangupButton_Click" Margin="5" Padding="10" Background="#6b8eff" Foreground="Black" FontSize="14" FontWeight="Bold"/>
+                <Button x:Name="HangupButton" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Content="Hangup" IsEnabled="False" Click="HangupButton_Click" Background="#6b8eff" Foreground="Black" Style="{StaticResource ActionButtonStyle}"/>
             </Grid>
         </StackPanel>
     </Grid>

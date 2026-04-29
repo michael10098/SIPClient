@@ -18,6 +18,8 @@ using SIPSorceryMedia.Windows;
 using SIPSorceryMedia.Abstractions;
 using System.IO;
 using System.Text.Json;
+using System.Media;
+using System.Threading.Tasks;
 
 namespace SIPClient;
 
@@ -39,6 +41,7 @@ public partial class MainWindow : Window
     private SIPUserAgent? userAgent;
     private SIPServerUserAgent? incomingCall;
     private string? incomingCallerId;
+    private SoundPlayer? ringPlayer;
 
     public MainWindow()
     {
@@ -102,7 +105,7 @@ public partial class MainWindow : Window
 
     /// <summary>
     /// Handles incoming call events. Displays the caller information, enables the answer button,
-    /// and prepares the call for answering.
+    /// and prepares the call for answering. Also plays a ring sound to notify the user.
     /// </summary>
     private void UserAgent_OnIncomingCall(SIPUserAgent agent, SIPRequest request)
     {
@@ -120,17 +123,23 @@ public partial class MainWindow : Window
 
             // accept the incoming call
             incomingCall = userAgent?.AcceptCall(request);
+
+            // play the ring sound
+            PlayRingSound();
         });
     }
 
     /// <summary>
     /// Handles call hangup events. Closes the media session, recreates audio and media endpoints,
-    /// and resets the UI to prepare for the next call.
+    /// and resets the UI to prepare for the next call. Also stops any playing ring sound.
     /// </summary>
     private void UserAgent_OnCallHangup(SIPDialogue dialogue)
     {
         Dispatcher.Invoke(() =>
         {
+            // stop the ring sound
+            StopRingSound();
+
             // indicate that the call ended
             voIPMediaSession?.Close("call ended");
 
@@ -157,15 +166,18 @@ public partial class MainWindow : Window
 
     /// <summary>
     /// Handles call cancellation events when the remote party cancels an incoming call before it's answered.
-    /// Displays the cancellation message and disables the answer button.
+    /// Displays the cancellation message, disables the answer button, and stops the ring sound.
     /// </summary>
     private void UserAgent_ServerCallCancelled(ISIPServerUserAgent uas, SIPRequest cancelRequest)
     {
         Dispatcher.Invoke(() =>
         {
+            // stop the ring sound
+            StopRingSound();
+
             // indicate that the call was cancelled and the number that tried to call
             DisplayBox.Text = $"Cancel {cancelRequest.Header.From.FromURI.User}";
-            
+
             // show the answer buton and not enabled
             AnswerButton.IsEnabled = false;
             AnswerButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6b8eff"));
@@ -248,13 +260,16 @@ public partial class MainWindow : Window
 
     /// <summary>
     /// Answers an incoming call. Sends the SIP 200 OK response, connects the media session,
-    /// and enables the hangup button. Displays success or failure status.
+    /// and enables the hangup button. Displays success or failure status. Stops the ring sound.
     /// </summary>
     private async void AnswerButton_Click(object sender, RoutedEventArgs e)
     {
         // check to see if we have an incoming call and a media session
         if (incomingCall != null && voIPMediaSession != null)
         {
+            // stop the ring sound when answering
+            StopRingSound();
+
             // show the answer buton as not enabled
             AnswerButton.IsEnabled = false;
             var result = await userAgent!.Answer(incomingCall, voIPMediaSession);
@@ -292,5 +307,46 @@ public partial class MainWindow : Window
         // show the hangup button as not enabled
         HangupButton.IsEnabled = false;
         HangupButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6b8eff"));
+    }
+
+    /// <summary>
+    /// Plays a ring sound when an incoming call arrives. Uses the system beep sound repeated.
+    /// </summary>
+    private void PlayRingSound()
+    {
+        // stop any existing ring sound
+        StopRingSound();
+
+        // create a new sound player with the system notification sound
+        ringPlayer = new SoundPlayer();
+
+        // play the system asterisk sound as a ring notification
+        SystemSounds.Asterisk.Play();
+
+        // start a task to repeat the ring sound every 2 seconds
+        Task.Run(async () =>
+        {
+            while (ringPlayer != null)
+            {
+                await Task.Delay(2000);
+                if (ringPlayer != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        SystemSounds.Asterisk.Play();
+                    });
+                }
+            }
+        });
+    }
+
+    /// <summary>
+    /// Stops the ring sound that was played for an incoming call.
+    /// </summary>
+    private void StopRingSound()
+    {
+        // dispose and clear the sound player
+        ringPlayer?.Dispose();
+        ringPlayer = null;
     }
 }
