@@ -33,6 +33,8 @@ public partial class MainWindow : Window
     private string domain = "";
     private string incomingCallNumber = "";
     private string defaultCallNumber = "";
+    private string apiUsername = "";
+    private string apiPassword = "";
     private SIPTransport? sipTransport;
     private SIPUDPChannel? sipChannel;
     private SIPRegistrationUserAgent? regUserAgent;
@@ -42,6 +44,8 @@ public partial class MainWindow : Window
     private SIPServerUserAgent? incomingCall;
     private string? incomingCallerId;
     private SoundPlayer? ringPlayer;
+    private HashSet<string> _seenIds = new HashSet<string>();
+    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
     public MainWindow()
     {
@@ -53,6 +57,10 @@ public partial class MainWindow : Window
         // display the text
         DisplayBox.Text = defaultCallNumber;
         TitleText.Text = "SIP Dialer - " + incomingCallNumber;
+
+        // start polling, cancelled automatically when the window closes
+        Closed += (s, e) => _cts.Cancel();
+        _ = StartPolling(_cts.Token);
     }
 
     /// <summary>
@@ -72,6 +80,8 @@ public partial class MainWindow : Window
         domain = config.Voip.Domain;
         incomingCallNumber = config.Voip.IncomingCallNumber;
         defaultCallNumber = config.Voip.DefaultCallNumber;
+        apiUsername = config.Voip.ApiUsername;
+        apiPassword = config.Voip.ApiPassword;
 
         // initialize the agent
         sipTransport = new SIPTransport();
@@ -190,12 +200,9 @@ public partial class MainWindow : Window
     /// </summary>
     private async Task<bool> MakeCall(string phoneNumber)
     {
-        // get the caller id
-        string callerId = incomingCallNumber;
-
         // set the URI for to and from to the phone number and callerId
         var toURI = SIPURI.ParseSIPURI($"sip:{phoneNumber}@{domain}");
-        var fromURI = SIPURI.ParseSIPURI($"sip:{callerId}@{domain}");
+        var fromURI = SIPURI.ParseSIPURI($"sip:{incomingCallNumber}@{domain}");
 
         // create a description of the call
         var callDescriptor = new SIPCallDescriptor(
@@ -255,6 +262,24 @@ public partial class MainWindow : Window
             MessageBox.Show($"Calling: {phoneNumber}", "SIP Call", MessageBoxButton.OK, MessageBoxImage.Information);
             // make the call
             bool callResult = await MakeCall(phoneNumber);
+        }
+    }
+
+    private async void SendSMS_Click(object sender, RoutedEventArgs e)
+    {
+        // show the number that we are calling
+        string phoneNumber = DisplayBox.Text;
+
+        // check to see if this number is valid
+        if (!string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            await SMS.SendSMSViaVoipMs(
+                apiUsername,
+                apiPassword,
+                incomingCallNumber,
+                phoneNumber,
+                "Hello from Michael Van Hulle"
+            );
         }
     }
 
@@ -348,5 +373,32 @@ public partial class MainWindow : Window
         // dispose and clear the sound player
         ringPlayer?.Dispose();
         ringPlayer = null;
+    }
+
+    public async Task StartPolling(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            var messages = await SMS.GetNewMessages(
+                apiUsername, 
+                apiPassword, 
+                incomingCallNumber);
+
+            foreach (var msg in messages)
+            {
+                // Skip messages we've already processed
+                if (_seenIds.Contains(msg.Id))
+                    continue;
+
+                _seenIds.Add(msg.Id);
+
+                Dispatcher.Invoke(() =>
+                {
+                    SmsMessagesBox.Text += $"[{msg.Date}] {msg.From}: {msg.Message}\n";
+                });
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(30), ct); // poll every 30 seconds
+        }
     }
 }

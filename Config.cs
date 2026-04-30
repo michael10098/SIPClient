@@ -10,4 +10,6 @@ public class VoipConfig
     public string Domain { get; set; } = "";
     public string IncomingCallNumber { get; set; } = "";
     public string DefaultCallNumber { get; set; } = "";
+    public string ApiUsername { get; set; } = "";
+    public string ApiPassword { get; set; } = "";
 }

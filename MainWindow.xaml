@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SIPClient"
         mc:Ignorable="d"
-        Title="SIP Client" Height="650" Width="500">
+        Title="SIP Client" Height="850" Width="500">
     <Window.Resources>
         <Style x:Key="DialButtonStyle" TargetType="Button">
             <Setter Property="Margin" Value="5"/>
@@ -88,7 +88,8 @@
 
                 <!-- Row 5: Call and Clear buttons spanning full width -->
                 <Button Grid.Row="4" Grid.Column="0" Content="Clear" Click="ClearButton_Click" Margin="5" Padding="10" Height="40" Background="#FF6B6B" Foreground="White" FontSize="14" FontWeight="Bold"/>
-                <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Content="Call" Click="CallButton_Click" Margin="5" Padding="10" Height="40" Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
+                <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="1" Content="Call" Click="CallButton_Click" Margin="5" Padding="10" Height="40" Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
+                <Button Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="1" Content="SMS" Click="SendSMS_Click" Margin="5" Padding="10" Height="40" Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
 
                 <!-- Row 6 Answer button spanning full width -->
                 <Button x:Name="AnswerButton" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Answer Call" IsEnabled="False" Click="AnswerButton_Click" Background="#6b8eff" Foreground="Black" Style="{StaticResource ActionButtonStyle}"/>
@@ -96,6 +97,12 @@
                 <!-- Row 7 Hang up button spanning full width -->
                 <Button x:Name="HangupButton" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Content="Hangup" IsEnabled="False" Click="HangupButton_Click" Background="#6b8eff" Foreground="Black" Style="{StaticResource ActionButtonStyle}"/>
             </Grid>
+
+            <!-- SMS Messages Display -->
+            <TextBlock Text="SMS Messages" FontSize="14" FontWeight="Bold" Margin="0,15,0,5"/>
+            <ScrollViewer Height="150" VerticalScrollBarVisibility="Auto">
+                <TextBox x:Name="SmsMessagesBox" IsReadOnly="True" TextWrapping="Wrap" Background="White" Foreground="Black" FontSize="12" Padding="5" BorderThickness="1" BorderBrush="#999"/>
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </Window>
