@@ -168,6 +168,10 @@ public partial class MainWindow : Window
             DisplayBox.Clear();
             incomingCallerId = null;
 
+            // show the hangup button as not enabled
+            HangupButton.IsEnabled = false;
+            HangupButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6b8eff"));
+
             // show the answer button as not enabled
             AnswerButton.IsEnabled = false;
             AnswerButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6b8eff"));
@@ -375,26 +379,42 @@ public partial class MainWindow : Window
         ringPlayer = null;
     }
 
+    /// <summary>
+    /// Starts a polling process that gets the SMS messages.
+    /// </summary>
+    /// <param name="ct">A cancellation token that should fire when the program exits.</param>
+    /// <returns>A task</returns>
     public async Task StartPolling(CancellationToken ct)
     {
+        // do this while we have not caneclled.
         while (!ct.IsCancellationRequested)
         {
+            // get the SMS messages
             var messages = await SMS.GetNewMessages(
                 apiUsername, 
                 apiPassword, 
                 incomingCallNumber);
 
-            foreach (var msg in messages)
+            // sort the SMS messages according to the message id
+            SortedDictionary<string, SMS.SmsMessage> sortedDictionary = new SortedDictionary<string, SMS.SmsMessage>();
+            messages.ForEach((msg) => sortedDictionary.Add(msg.Id, msg));
+
+            // iterate through the sorted list
+            foreach (var item in sortedDictionary)
             {
                 // Skip messages we've already processed
-                if (_seenIds.Contains(msg.Id))
+                if (_seenIds.Contains(item.Key))
                     continue;
 
-                _seenIds.Add(msg.Id);
+                // add the message because it has already been seen
+                _seenIds.Add(item.Key);
 
                 Dispatcher.Invoke(() =>
                 {
-                    SmsMessagesBox.Text += $"[{msg.Date}] {msg.From}: {msg.Message}\n";
+                    // add the message to the text box
+                    SmsMessagesBox.Text += $"[{item.Value.Date}] {item.Value.From}: {item.Value.Message}\n";
+                    // scroll to the last message
+                    SmsMessagesBox.ScrollToLine(_seenIds.Count);
                 });
             }
 

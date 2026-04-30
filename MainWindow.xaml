@@ -44,7 +44,7 @@
         <Grid.Background>
             <ImageBrush ImageSource="Images/Background.png" Stretch="UniformToFill"/>
         </Grid.Background>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="400">
             <TextBlock x:Name="TitleText" Text="SIP Dialer" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
             <TextBlock Text="Designed by Michael Van Hulle" FontSize="12" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
 
